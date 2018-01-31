@@ -46,7 +46,7 @@ namespace powerbi.extensibility.utils.chart.label  {
 
     export interface LabelParentPolygon {
         /** The point this data label belongs to */
-        polygon: powerbi.extensibility.utils.svg.shapes.Polygon;
+        polygon: powerbi.extensibility.utils.svg.shapes.IPolygon;
         /** Valid positions to place the label ordered by preference */
         validPositions: NewPointLabelPosition[];
     }
