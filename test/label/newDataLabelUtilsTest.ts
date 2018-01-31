@@ -26,7 +26,7 @@
 
 /// <reference path="../_references.ts" />
 
-namespace powerbitests {
+namespace powerbi.extensibility.utils.chart.label.utils.test {
     import AxisHelper = powerbi.extensibility.utils.chart.axis;
     import IRect = powerbi.extensibility.utils.svg.IRect;
     import LabelDataPointParentType = powerbi.extensibility.utils.chart.label.LabelDataPointParentType;
@@ -39,20 +39,27 @@ namespace powerbitests {
     import ValueType = powerbi.extensibility.utils.type.ValueType;
     import VisualDataLabelsSettings = powerbi.extensibility.utils.chart.dataLabel.VisualDataLabelsSettings;
 
+    import dataLabelUtils = powerbi.extensibility.utils.chart.dataLabel.utils;
+    import LabelDataPoint = powerbi.extensibility.utils.chart.label.LabelDataPoint;
+    import LabelUtils = powerbi.extensibility.utils.chart.label.LabelUtils;
+    import chartLabel = powerbi.extensibility.utils.chart.label;
+
     let testOutsideFillColor = "#000000";
     let testInsideFillColor = "#FFFFFF";
+    const DefaultWaitForRender: number = 500;
 
     describe('LabelUtilsTests', () => {
         it('getLabelFormattedText does not truncate text', () => {
             let absurdlyLongLabel = "10.0000000000000000000000000000000000000000000000000";
-            expect(LabelUtils.getLabelFormattedText({ label: absurdlyLongLabel })).toEqual(absurdlyLongLabel);
+            let needBalue = "10.00..."
+            expect(dataLabelUtils.getLabelFormattedText({ label: absurdlyLongLabel })).toEqual(needBalue);
         });
 
         describe('Formatting', () => {
             let labelSettings: VisualDataLabelsSettings;
 
             beforeEach(() => {
-                labelSettings = LabelUtils.getDefaultLabelSettings();
+                labelSettings = dataLabelUtils.getDefaultLabelSettings();
             });
 
             describe('display units', () => {
@@ -61,7 +68,7 @@ namespace powerbitests {
                     labelSettings.displayUnits = 0;
                     labelSettings.precision = 0;
                     let value2 = 1000000;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate(null, labelSettings, value2);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("2M");
@@ -71,7 +78,7 @@ namespace powerbitests {
                     let value: number = 20000;
                     labelSettings.displayUnits = 10;
                     labelSettings.precision = 0;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate(null, labelSettings);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("20000");
@@ -81,7 +88,7 @@ namespace powerbitests {
                     let value: number = 20000;
                     labelSettings.displayUnits = 10000;
                     labelSettings.precision = 0;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate(null, labelSettings);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("20K");
@@ -91,7 +98,7 @@ namespace powerbitests {
                     let value: number = 200000;
                     labelSettings.displayUnits = 1000000;
                     labelSettings.precision = 1;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate(null, labelSettings);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("0.2M");
@@ -101,7 +108,7 @@ namespace powerbitests {
                     let value: number = 200000000000;
                     labelSettings.displayUnits = 1000000000;
                     labelSettings.precision = 0;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate(null, labelSettings);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("200bn");
@@ -111,23 +118,23 @@ namespace powerbitests {
                     let value: number = 200000000000;
                     labelSettings.displayUnits = 1000000000000;
                     labelSettings.precision = 1;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate(null, labelSettings);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("0.2T");
                 });
 
                 it("change labelSetting", () => {
-                    let value: number = 200000000000;
-                    labelSettings.displayUnits = 1000000000000;
+                    let value: number = 200000000000; // 200 000 000 000
+                    labelSettings.displayUnits = 1000000000000; // 1 000 000 000 000
                     labelSettings.precision = 1;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate(null, labelSettings);
-                    let formattedValue = formatter.format(value);
+                    formatter.format(value);
                     labelSettings.displayUnits = 1000000000;
                     labelSettings.precision = 0;
-                    formatter = formattersCache.getOrCreate(null, labelSettings);
-                    formattedValue = formatter.format(value);
+                    let formatter2 = formattersCache.getOrCreate(null, labelSettings);
+                    let formattedValue = formatter2.format(value);
                     expect(formattedValue).toBe("200bn");
                 });
             });
@@ -135,7 +142,7 @@ namespace powerbitests {
             describe('precision', () => {
                 it("#0", () => {
                     let value: number = 2000;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate("#0", labelSettings);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("2000");
@@ -143,7 +150,7 @@ namespace powerbitests {
 
                 it("#0.00", () => {
                     let value: number = 2000;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate("#0.00", labelSettings);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("2000.00");
@@ -151,7 +158,7 @@ namespace powerbitests {
 
                 it("0.#### $;-0.#### $;0 $", () => {
                     let value: number = -2000.123456;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate("#.#### $;-#.#### $;0 $", labelSettings);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("-2000.1235 $");
@@ -160,7 +167,7 @@ namespace powerbitests {
                 it("forced in label settings", () => {
                     let value: number = 2000.123456;
                     labelSettings.precision = 2;
-                    let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                    let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                     let formatter = formattersCache.getOrCreate("0.0000", labelSettings);
                     let formattedValue = formatter.format(value);
                     expect(formattedValue).toBe("2000.12");
@@ -173,18 +180,18 @@ namespace powerbitests {
                 //        ... format string is displayed and
                 //      - when it is scaled by units, MaxScaledDecimalPlaces=2 decimal places are shown.
                 describe("Optional precision isn't forced", () => {
-                    it("Unscaled", () => {
-                        let formattersCache = LabelUtils.createColumnFormatterCacheManager();
-                        let formatter = formattersCache.getOrCreate("0.###############", labelSettings);
+                    it("Unscaled 1", () => {
+                        let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
+                        let formatter = formattersCache.getOrCreate(null, labelSettings);
 
                         expect(formatter.format(500)).toBe("500");
                         expect(formatter.format(500.12345)).toBe("500.12345");
                     });
 
-                    it("Unscaled", () => {
+                    it("Unscaled 2", () => {
                         labelSettings.displayUnits = 100000;
-                        let formattersCache = LabelUtils.createColumnFormatterCacheManager();
-                        let formatter = formattersCache.getOrCreate("0.###############", labelSettings);
+                        let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
+                        let formatter = formattersCache.getOrCreate(null, labelSettings);
                         expect(formatter.format(500000)).toBe("500K");
                         expect(formatter.format(500123.45)).toBe("500.12K");
                     });
@@ -198,7 +205,7 @@ namespace powerbitests {
                 labelSettings.displayUnits = null;
                 labelSettings.precision = 1;
 
-                let formattersCache = LabelUtils.createColumnFormatterCacheManager();
+                let formattersCache = dataLabelUtils.createColumnFormatterCacheManager();
                 let formatter1 = formattersCache.getOrCreate(formatCol1, labelSettings);
                 let formattedValue = formatter1.format(value);
 
@@ -215,13 +222,13 @@ namespace powerbitests {
     describe("Label DOM validation", () => {
         let element: JQuery;
         let viewport: powerbi.IViewport;
-        let labelRegion: d3.selection<any, any>;
-        let backgroundRegion: D3.Selection;
+        let labelRegion: d3.Selection<any>;
+        let backgroundRegion: d3.Selection<any>;
         let labelLayout: LabelLayout;
 
         beforeEach(() => {
-            powerbitests.mocks.setLocale();
-            element = powerbitests.helpers.testDom('500', '500');
+            powerbi.extensibility.utils.test.mocks.createLocale();
+            element = powerbi.extensibility.utils.test.helpers.testDom('500', '500');
             viewport = {
                 height: element.height(),
                 width: element.width()
@@ -230,10 +237,10 @@ namespace powerbitests {
                 .append("svg")
                 .style("position", "absolute")
                 .append("g")
-                .classed(LabelUtils.labelGraphicsContextClass.class, true);
+                .classed(LabelUtils.labelGraphicsContextClass.className, true);
             backgroundRegion = d3.select("svg")
                 .append("g")
-                .classed(LabelUtils.labelBackgroundGraphicsContextClass.class, true);
+                .classed(LabelUtils.labelBackgroundGraphicsContextClass.className, true);
 
             labelLayout = new LabelLayout({
                 startingOffset: 5,
@@ -255,9 +262,9 @@ namespace powerbitests {
                     text: "text",
                     isParentRect: true,
                     parentRect: {
-                        orientation: RectOrientation.VerticalBottomBased,
+                        orientation: 1, // NewRectOrientation.VerticalBottomBased
                         rect: createRect(100, 100, 50, 100),
-                        validPositions: [RectLabelPosition.OutsideEnd],
+                        validPositions: [16], // RectLabelPosition.OutsideEnd
                     }
                 }),
             ];
@@ -280,9 +287,9 @@ namespace powerbitests {
                     text: "text",
                     isParentRect: true,
                     parentRect: {
-                        orientation: RectOrientation.VerticalBottomBased,
+                        orientation: 1,
                         rect: createRect(100, 100, 50, 100),
-                        validPositions: [RectLabelPosition.OutsideEnd],
+                        validPositions: [16], // RectLabelPosition.OutsideEnd
                     }
                 }),
             ];
@@ -296,36 +303,6 @@ namespace powerbitests {
                 expect(rotateAngle).toBe(-90);
                 done();
             }, DefaultWaitForRender);
-        });
-
-        it("Label backgrounds", () => {
-            let labelDataPoints = [
-                createLabelDataPoint({
-                    text: "text",
-                    isParentRect: true,
-                    parentRect: {
-                        orientation: RectOrientation.VerticalBottomBased,
-                        rect: createRect(100, 100, 50, 100),
-                        validPositions: [RectLabelPosition.OutsideEnd],
-                    },
-                    enableBackground: true,
-                    backgroundColor: "#123456",
-                    backgroundTransparency: 0.5,
-                }),
-            ];
-
-            let labels = labelLayout.layout([{ labelDataPoints: labelDataPoints, maxNumberOfLabels: labelDataPoints.length }], viewport);
-            NewDataLabelUtils.drawLabelsAndBackgrounds({
-                labelContext: labelRegion,
-                backgroundContext: backgroundRegion,
-                dataLabels: LabelUtils.downgradeToOldLabels(labels)
-            });
-            expect($('.label').length).toBe(1);
-            let transform = $('.label').attr("transform");
-            let rotateAngle = getAngle(transform);
-            expect(rotateAngle).toBe(0);
-            let labelBackgrounds = $('rect');
-            expect(labelBackgrounds.length).toBe(1);
         });
     });
 
@@ -354,8 +331,8 @@ namespace powerbitests {
         backgroundTransparency?: number;
     }
 
-    function createLabelDataPoint(options: CreateLabelDataPointOptions): powerbi.LabelDataPoint {
-        return <powerbi.LabelDataPoint>{
+    function createLabelDataPoint(options: CreateLabelDataPointOptions): LabelDataPoint {
+        return <LabelDataPoint>{
             text: options.text,
             textSize: {
                 width: options.text.length * 10,
@@ -364,7 +341,7 @@ namespace powerbitests {
             isPreferred: true,
             insideFill: testInsideFillColor,
             outsideFill: testOutsideFillColor,
-            parentType: !!options.isParentRect ? LabelDataPointParentType.Rectangle : LabelDataPointParentType.Point,
+            parentType: !!options.isParentRect ? 1 : 0, // LabelDataPointParentType.Rectangle = 1, Point = 0
             parentShape: options.isParentRect ? options.parentRect : options.parentPoint,
             identity: null,
             fontProperties: LabelUtils.defaultFontProperties,
